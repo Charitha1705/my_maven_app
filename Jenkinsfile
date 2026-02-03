@@ -4,6 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = "1ms24mc020/my_maven_app"
         DOCKERHUB = credentials('dockerhub')
+        KUBECONFIG_CRED = credentials('kubeconfig') // Jenkins credential for kubeconfig
     }
 
     stages {
@@ -31,6 +32,17 @@ pipeline {
             steps {
                 sh 'docker login -u $DOCKERHUB_USR -p $DOCKERHUB_PSW'
                 sh 'docker push $IMAGE_NAME:latest'
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                withKubeConfig([credentialsId: 'kubeconfig']) {
+                    sh '''
+                        kubectl set image deployment/my-maven-app my-maven-app=$IMAGE_NAME:latest --record
+                        kubectl rollout status deployment/my-maven-app
+                    '''
+                }
             }
         }
     }

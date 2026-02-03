@@ -1,10 +1,12 @@
 pipeline {
     agent any
-
+    triggers{
+    cron(* * * * *)
+    }
     environment {
         IMAGE_NAME = "1ms24mc020/my_maven_app"
         DOCKERHUB = credentials('dockerhub')
-        KUBECONFIG_CRED = credentials('kubeconfig') // Jenkins credential for kubeconfig
+        KUBECONFIG_CRED = credentials('kubeconfig') 
     }
 
     stages {
